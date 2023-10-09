@@ -6,14 +6,14 @@ const requestTransport = new winston.transports.DailyRotateFile({
   filename: 'logs/requests/request-%DATE%.log',
   datePattern: 'YYYY-MM-DD-HH',
   maxSize: '20m',
-  maxFiles: '7d'
+  maxFiles: '7d',
 });
 
 const errorTransport = new winston.transports.DailyRotateFile({
   filename: 'logs/errors/error-%DATE%.log',
   datePattern: 'YYYY-MM-DD-HH',
   maxSize: '20m',
-  maxFiles: '14d'
+  maxFiles: '14d',
 });
 
 export const requestLogger = expressWinston.logger({

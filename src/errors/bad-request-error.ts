@@ -1,12 +1,16 @@
 import { ErrorCodes } from '../vendor/constants/error-codes';
 
-export class BadRequestError extends Error {
+class BadRequestError extends Error {
   message: string;
+
   statusCode: number;
 
-  constructor(message: string) {
+  constructor(message: string, name = 'Bad request') {
     super(message);
+    this.name = name;
     this.message = message;
     this.statusCode = ErrorCodes.BadRequest;
   }
 }
+
+export default BadRequestError;
