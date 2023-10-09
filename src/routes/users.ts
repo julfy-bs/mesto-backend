@@ -6,14 +6,14 @@ import {
   patchUserData,
   patchUserAvatar,
 } from '../controllers/users';
-import { validateCreateUser } from '../vendor/validation/validate-create-user';
-import { validateGetUserId } from '../vendor/validation/validate-get-user-id';
+import userValidation from '../vendor/validation/user';
 
 const router = Router();
+
 router.get('/users', getUsers);
-router.get('/users/:userId', validateGetUserId, getUserById);
-router.post('/users', validateCreateUser, createUser);
-router.patch('/users/me', patchUserData);
-router.patch('/users/me/avatar', patchUserAvatar);
+router.get('/users/:userId', userValidation.findById, getUserById);
+router.post('/users', userValidation.create, createUser);
+router.patch('/users/me', userValidation.patchInfo, patchUserData);
+router.patch('/users/me/avatar', userValidation.patchAvatar, patchUserAvatar);
 
 export default router;

@@ -1,7 +1,7 @@
 import { celebrate, Joi } from 'celebrate';
-import { ErrorText } from '../constants/error-text';
+import { ErrorText } from '../../constants/error-text';
 
-export const validateCreateUser = celebrate(
+export const validatePatchUserData = celebrate(
   {
     body: {
       about: Joi
@@ -11,15 +11,12 @@ export const validateCreateUser = celebrate(
         .trim()
         .strict()
         .required(),
-      avatar: Joi
-        .string()
-        .trim()
-        .strict()
-        .required(),
       name: Joi
         .string()
         .trim()
         .strict()
+        .min(2)
+        .max(30)
         .required(),
     },
   },
@@ -30,9 +27,8 @@ export const validateCreateUser = celebrate(
       'string.trim': ErrorText.Trim,
       'string.min': ErrorText.Min,
       'string.max': ErrorText.Max,
-      'any.required': ErrorText.Required,
-      'string.dataUri': ErrorText.DataUri,
       'string.empty': ErrorText.Empty,
+      'any.required': ErrorText.Required,
     },
   },
 );

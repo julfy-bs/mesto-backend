@@ -37,7 +37,9 @@
         "js": "never",
         "ts": "never"
       }
-    ]
-  },
-  "no-underscore-dangle": "off"
+    ],
+    "consistent-return": "off",
+    "no-console": "off",
+    "no-underscore-dangle": "off"
+  }
 }
