@@ -1,3 +1,6 @@
+import process from 'process';
+import config from '../vendor/config';
+
 export type ResponseType = {
   success: boolean;
   data?: unknown;
@@ -72,8 +75,7 @@ class AppResponse {
   }
 
   private log() {
-    const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
-    if (NODE_ENVIRONMENT === 'development') {
+    if (process.env.NODE_ENV === config.NODE_ENV) {
       console.log(this.response);
     }
   }

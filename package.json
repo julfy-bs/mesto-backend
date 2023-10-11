@@ -1,7 +1,8 @@
 {
   "name": "mesto-backend",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.1.1",
+  "description": "Backend Server for project Mesto",
+  "repository": "https://github.com/julfy-bs/mesto-backend/",
   "author": {
     "name": "Bogdan Sutuzhko",
     "email": "julfy-bs@yandex.ru"

@@ -1,3 +1,5 @@
+import process from 'process';
+import config from '../vendor/config';
 import { ErrorResponseType } from './app-response';
 
 /**
@@ -18,9 +20,11 @@ const splitError = (error: Error, part: number): string => error
 /**
  * Получает подробное описание ошибки в зависимости от условий:
  * - если у ошибки есть поле stack и приложение запущено в режиме разработки
- * `NODE_ENVIRONMENT === 'development'` возвращает подробную информацию о том,
+ * `NODE_ENV === config.NODE_ENV` возвращает подробную информацию о том,
  * что за ошибка и где она произошла.
  * - если не выполнилось ни одно из условий возвращает пустую строку.
+ *
+ * @see config
  *
  * Преднамеренно возвращает строку со стандартным типом ошибки при ответе на клиенте,
  * для защиты приложения.
@@ -32,8 +36,8 @@ const splitError = (error: Error, part: number): string => error
  * @return {string}
  * */
 const getErrorName = (error: Error): string => {
-  const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
-  if (typeof error.toString === 'function' && NODE_ENVIRONMENT === 'development') {
+  if (typeof error.toString === 'function'
+    && process.env.NODE_ENV === config.NODE_ENV) {
     return splitError(error, 0);
   }
   return 'Error';
@@ -41,9 +45,11 @@ const getErrorName = (error: Error): string => {
 
 /**
  * Получает текст ошибки в зависимости от условий:
- * - если приложение запущено в режиме разработки `NODE_ENVIRONMENT === 'development',
+ * - если приложение запущено в режиме разработки `NODE_ENV === config.NODE_ENV,
  * пытается привести объект ошибки к строке.
  * - если не выполнилось ни одно из условий возвращает пустую строку.
+ *
+ * @see config
  *
  * Преднамеренно возвращает пустую строку при ответе на клиенте, для защиты приложения.
  *
@@ -54,8 +60,8 @@ const getErrorName = (error: Error): string => {
  * @return {string}
  * */
 const getErrorMessage = (error: Error): string => {
-  const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
-  if (typeof error.toString === 'function' && NODE_ENVIRONMENT === 'development') {
+  if (typeof error.toString === 'function'
+    && process.env.NODE_ENV === config.NODE_ENV) {
     return splitError(error, 1);
   }
   return '';
@@ -64,9 +70,11 @@ const getErrorMessage = (error: Error): string => {
 /**
  * Получает подробное описание ошибки в зависимости от условий:
  * - если у ошибки есть поле stack и приложение запущено в режиме разработки
- * `NODE_ENVIRONMENT === 'development'` возвращает подробную информацию о том,
+ * `NODE_ENVIRONMENT === config.NODE_ENV` возвращает подробную информацию о том,
  * что за ошибка и где она произошла.
  * - если не выполнилось ни одно из условий возвращает пустую строку.
+ *
+ * @see config
  *
  * Преднамеренно возвращает пустую строку при ответе на клиенте, для защиты приложения.
  *
@@ -77,8 +85,9 @@ const getErrorMessage = (error: Error): string => {
  * @return {string}
  * */
 const getErrorBody = (error: Error): string => {
-  const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
-  if (error.stack && NODE_ENVIRONMENT === 'development') return error.stack;
+  if (error.stack && process.env.NODE_ENV === config.NODE_ENV) {
+    return error.stack;
+  }
   return '';
 };
 
