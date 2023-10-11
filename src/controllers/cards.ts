@@ -4,6 +4,7 @@ import BadRequestError from '../errors/bad-request-error';
 import NotFoundError from '../errors/not-found-error';
 import AppResponse from '../helpers/app-response';
 import Card, { CardType } from '../models/card';
+import { ErrorText } from '../vendor/constants/error-text';
 
 /**
  * Функция обработчик запроса для получения коллекции карточек.
@@ -21,7 +22,7 @@ import Card, { CardType } from '../models/card';
 export const getCards = (request: Request, response: Response, next: NextFunction) => Card.find({})
   .then((cards: CardType[]): void => {
     if (!cards) {
-      throw new NotFoundError('При поиске карточек произошла ошибка');
+      throw new NotFoundError(ErrorText.ServerCardNotFound);
     }
     response.send(new AppResponse(cards).send());
   })
@@ -48,13 +49,13 @@ export const deleteCardById = (request: Request, response: Response, next: NextF
   const { cardId } = request.params;
 
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
-    throw new BadRequestError('Ошибка ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
 
   return Card.findByIdAndDelete(cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('При удалении карточки произошла ошибка');
+        throw new NotFoundError(ErrorText.ServerCardDeleteNotFound);
       }
       response.send(new AppResponse(card).send());
     })
@@ -81,13 +82,13 @@ export const createCard = (request: Request, response: Response, next: NextFunct
   const { name, link } = request.body;
   // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError('Ошибка ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
   // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   return Card.create({ name, link, owner: request.user._id })
     .then((newCard) => {
       if (!newCard) {
-        throw new BadRequestError('При создании карточки произошла ошибка');
+        throw new BadRequestError(ErrorText.ServerCardCreate);
       }
       response.send(new AppResponse(newCard).send());
     })
@@ -115,11 +116,11 @@ export const likeCard = (request: Request, response: Response, next: NextFunctio
   const { cardId } = request.params;
 
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
-    throw new BadRequestError('Ошибка ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
   // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError('Ошибка ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
   return Card.findByIdAndUpdate(
     cardId,
@@ -129,7 +130,7 @@ export const likeCard = (request: Request, response: Response, next: NextFunctio
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('При попытке поставить лайк произошла ошибка');
+        throw new NotFoundError(ErrorText.ServerCardLike);
       }
       response.send(new AppResponse(card).send());
     })
@@ -157,11 +158,11 @@ export const dislikeCard = (request: Request, response: Response, next: NextFunc
   const { cardId } = request.params;
 
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
-    throw new BadRequestError('Ошибка ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
   // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError('Ошибка ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
   return Card.findByIdAndUpdate(
     cardId,
@@ -171,7 +172,7 @@ export const dislikeCard = (request: Request, response: Response, next: NextFunc
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('При попытке убрать лайк произошла ошибка');
+        throw new NotFoundError(ErrorText.ServerCardDislike);
       }
       response.send(new AppResponse(card).send());
     })

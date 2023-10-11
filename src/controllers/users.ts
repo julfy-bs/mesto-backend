@@ -4,6 +4,7 @@ import BadRequestError from '../errors/bad-request-error';
 import NotFoundError from '../errors/not-found-error';
 import AppResponse from '../helpers/app-response';
 import User from '../models/user';
+import { ErrorText } from '../vendor/constants/error-text';
 
 /**
  * Функция обработчик запроса для получения коллекции пользователей.
@@ -21,7 +22,7 @@ import User from '../models/user';
 export const getUsers = (request: Request, response: Response, next: NextFunction) => User.find({})
   .then((users) => {
     if (users.length === 0) {
-      throw new NotFoundError('При поиске пользователей произошла ошибка');
+      throw new NotFoundError(ErrorText.ServerUserNotFound);
     }
     response.send(new AppResponse(users).send());
   })
@@ -48,13 +49,13 @@ export const getUserById = (request: Request, response: Response, next: NextFunc
   const { userId } = request.params;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new BadRequestError('Введен некорректный ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
 
   return User.findById(userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('При поиске пользователя произошла ошибка');
+        throw new NotFoundError(ErrorText.ServerUserNotFound);
       }
       response.send(new AppResponse(user).send());
     })
@@ -81,7 +82,7 @@ export const createUser = (request: Request, response: Response, next: NextFunct
   return User.create({ about, avatar, name })
     .then((newUser) => {
       if (!newUser) {
-        throw new BadRequestError('При создании пользователя произошла ошибка');
+        throw new BadRequestError(ErrorText.ServerUserCreate);
       }
       response.send(new AppResponse(newUser).send());
     })
@@ -109,13 +110,13 @@ export const patchUserData = (request: Request, response: Response, next: NextFu
   const { about, name } = request.body;
   // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError('Ошибка ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
   // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   return User.findByIdAndUpdate(request.user._id, { about, name }, { new: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('При поиске пользователя произошла ошибка');
+        throw new NotFoundError(ErrorText.ServerUserNotFound);
       }
       response.send(new AppResponse(user).send());
     })
@@ -143,13 +144,13 @@ export const patchUserAvatar = (request: Request, response: Response, next: Next
   const { avatar } = request.body;
   // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError('Ошибка ID');
+    throw new BadRequestError(ErrorText.ServerId);
   }
   // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   return User.findByIdAndUpdate(request.user._id, { avatar }, { new: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('При поиске пользователя произошла ошибка');
+        throw new NotFoundError(ErrorText.ServerUserNotFound);
       }
       response.send(new AppResponse(user).send());
     })

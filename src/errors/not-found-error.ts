@@ -1,11 +1,12 @@
 import { ErrorCodes } from '../vendor/constants/error-codes';
+import { ErrorText } from '../vendor/constants/error-text';
 
 class NotFoundError extends Error {
   message: string;
 
   statusCode: number;
 
-  constructor(message: string, name = 'Not Found') {
+  constructor(message = ErrorText.ServerNotFound, name = 'Not Found') {
     super(message);
     this.name = name;
     this.message = message;
