@@ -1,13 +1,13 @@
 import { isCelebrateError } from 'celebrate';
 import { NextFunction, Request, Response } from 'express';
 import AppResponse, { ValidationErrorResponseType } from '../helpers/app-response';
-import { ErrorCodes } from '../vendor/constants/error-codes';
+import { StatusCodes } from '../vendor/constants/status-codes';
 import { ErrorText } from '../vendor/constants/error-text';
 
 type ValidationSources = 'body' | 'params' | 'cookies' | 'headers';
 const createValidationErrorResponse = (validatedData: ValidationSources[], error = 'Bad request', message = 'Ошибка валидации входных данных'): ValidationErrorResponseType => {
   const errorResponse: ValidationErrorResponseType = {
-    statusCode: ErrorCodes.BadRequest,
+    statusCode: StatusCodes.BadRequest,
     name: error,
     message: message || ErrorText.ServerBadRequest,
   };

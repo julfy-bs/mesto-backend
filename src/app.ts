@@ -1,35 +1,40 @@
+import cors from 'cors';
 import express, { Express } from 'express';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import * as process from 'process';
-
-import usersRouter from './routes/users';
-import cardsRouter from './routes/cards';
+import { createUser, login } from './controllers/users';
+import NotFoundError from './errors/not-found-error';
+import connectDatabase from './helpers/connect-database';
 
 import auth from './middleware/auth';
-import handleValidationError from './middleware/handle-validation-error';
 import handleDefaultError from './middleware/handle-default-error';
-import { requestLogger, errorLogger } from './middleware/logger';
-import config from './vendor/config';
+import handleValidationError from './middleware/handle-validation-error';
+import { errorLogger, requestLogger } from './middleware/logger';
+import cardsRouter from './routes/cards';
 
-dotenv.config();
-const { PORT = 3000, DB } = process.env;
-void mongoose.connect(DB || config.DB);
+import usersRouter from './routes/users';
 
+import { sanitizedConfig } from './vendor/constants/config';
+import { ErrorText } from './vendor/constants/error-text';
+import userValidation from './vendor/validation/user';
+
+void connectDatabase();
 const app: Express = express();
 
+app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.use(requestLogger);
-app.use(auth);
-app.use('/', usersRouter);
-app.use('/', cardsRouter);
-
+app.post('/signin', userValidation.login, login);
+app.post('/signup', userValidation.signup, createUser);
+app.use('/users', auth, usersRouter);
+app.use('/cards', auth, cardsRouter);
+app.all('/*', () => {
+  throw new NotFoundError(ErrorText.ServerPageNotFound)
+});
 app.use(errorLogger);
 app.use(handleValidationError);
 app.use(handleDefaultError);
 
-app.listen(PORT, () => {
-  console.log(`⚡️[server]: Server is running at http://localhost:${ PORT }`);
+app.listen(sanitizedConfig.PORT, () => {
+  console.log(`⚡️[server]: Server is running at http://localhost:${ sanitizedConfig.PORT }`);
 });

@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import BadRequestError from '../errors/bad-request-error';
+import InvalidAuthentication from '../errors/invalid-authentication';
 import NotFoundError from '../errors/not-found-error';
 import AppResponse from '../helpers/app-response';
 import Card, { CardType } from '../models/card';
 import { ErrorText } from '../vendor/constants/error-text';
+import { StatusCodes } from '../vendor/constants/status-codes';
 
 /**
  * Функция обработчик запроса для получения коллекции карточек.
@@ -19,14 +21,15 @@ import { ErrorText } from '../vendor/constants/error-text';
  * @param {NextFunction} next - функция `next()` Express.
  * @see NextFunction
  */
-export const getCards = (request: Request, response: Response, next: NextFunction) => Card.find({})
-  .then((cards: CardType[]): void => {
-    if (!cards) {
-      throw new NotFoundError(ErrorText.ServerCardNotFound);
-    }
-    response.send(new AppResponse(cards).send());
-  })
-  .catch(next);
+export const getCards = (request: Request, response: Response, next: NextFunction) =>
+  Card.find({})
+    .orFail(new NotFoundError(ErrorText.ServerCardNotFound))
+    .then((cards: CardType[]): void => {
+      response
+        .status(StatusCodes.Success)
+        .send(new AppResponse(cards).send());
+    })
+    .catch(next);
 
 /**
  * Функция обработчик запроса для удаления карточки по ID.
@@ -47,18 +50,23 @@ export const getCards = (request: Request, response: Response, next: NextFunctio
  */
 export const deleteCardById = (request: Request, response: Response, next: NextFunction) => {
   const { cardId } = request.params;
+  const { _id: userId } = request.user;
 
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
     throw new BadRequestError(ErrorText.ServerId);
   }
 
   return Card.findByIdAndDelete(cardId)
+    .orFail(new NotFoundError(ErrorText.ServerCardDeleteNotFound))
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError(ErrorText.ServerCardDeleteNotFound);
-      }
-      response.send(new AppResponse(card).send());
-    })
+        if (userId !== card.owner) {
+          throw new InvalidAuthentication(ErrorText.ServerAuthDeleteError);
+        }
+        response
+          .status(StatusCodes.Success)
+          .send(new AppResponse(card).send());
+      },
+    )
     .catch(next);
 };
 
@@ -80,17 +88,19 @@ export const deleteCardById = (request: Request, response: Response, next: NextF
  */
 export const createCard = (request: Request, response: Response, next: NextFunction) => {
   const { name, link } = request.body;
-  // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
-  if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
+  const { _id: userId } = request.user;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new BadRequestError(ErrorText.ServerId);
   }
-  // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
-  return Card.create({ name, link, owner: request.user._id })
+  return Card.create({ name, link, owner: userId.toString() })
     .then((newCard) => {
       if (!newCard) {
         throw new BadRequestError(ErrorText.ServerCardCreate);
       }
-      response.send(new AppResponse(newCard).send());
+      response
+        .status(StatusCodes.Created)
+        .send(new AppResponse(newCard).send());
     })
     .catch(next);
 };
@@ -114,26 +124,23 @@ export const createCard = (request: Request, response: Response, next: NextFunct
  */
 export const likeCard = (request: Request, response: Response, next: NextFunction) => {
   const { cardId } = request.params;
+  const { _id: userId } = request.user;
 
-  if (!mongoose.Types.ObjectId.isValid(cardId)) {
+  if (!mongoose.Types.ObjectId.isValid(cardId)
+    || !mongoose.Types.ObjectId.isValid(userId)) {
     throw new BadRequestError(ErrorText.ServerId);
   }
-  // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
-  if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError(ErrorText.ServerId);
-  }
+
   return Card.findByIdAndUpdate(
     cardId,
-    // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
-    { $addToSet: { likes: request.user._id } },
+    { $addToSet: { likes: userId } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError(ErrorText.ServerCardLike);
-      }
-      response.send(new AppResponse(card).send());
-    })
+    .orFail(new NotFoundError(ErrorText.ServerCardLike))
+    .then((card) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(card).send()),
+    )
     .catch(next);
 };
 
@@ -156,25 +163,22 @@ export const likeCard = (request: Request, response: Response, next: NextFunctio
  */
 export const dislikeCard = (request: Request, response: Response, next: NextFunction) => {
   const { cardId } = request.params;
+  const { _id: userId } = request.user;
 
-  if (!mongoose.Types.ObjectId.isValid(cardId)) {
+  if (!mongoose.Types.ObjectId.isValid(cardId)
+    || !mongoose.Types.ObjectId.isValid(userId)) {
     throw new BadRequestError(ErrorText.ServerId);
   }
-  // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
-  if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError(ErrorText.ServerId);
-  }
+
   return Card.findByIdAndUpdate(
     cardId,
-    // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
-    { $pull: { likes: request.user._id } },
+    { $pull: { likes: userId } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError(ErrorText.ServerCardDislike);
-      }
-      response.send(new AppResponse(card).send());
-    })
+    .orFail(new NotFoundError(ErrorText.ServerCardDislike))
+    .then((card) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(card).send()),
+    )
     .catch(next);
 };

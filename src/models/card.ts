@@ -1,4 +1,5 @@
 import { model, Schema } from 'mongoose';
+import validator from 'validator';
 
 export type CardType = {
   name: string;
@@ -18,10 +19,12 @@ const cardSchema = new Schema<CardType>({
   link: {
     type: String,
     required: true,
+    validate: [validator.isURL, '{VALUE} не является валидным url\'ом']
   },
   owner: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true,
+    validate: [validator.isMongoId, '{VALUE} не является валидным ObjectId']
   },
   likes: {
     type: [Schema.Types.ObjectId],

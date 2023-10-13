@@ -1,6 +1,6 @@
 import { isCelebrateError } from 'celebrate';
 import { Response } from 'express';
-import { ErrorCodes } from '../vendor/constants/error-codes';
+import { StatusCodes } from '../vendor/constants/status-codes';
 import isErrorStatusCode from './is-error-status-code';
 
 type getHttpStatusCodeOptions = {
@@ -28,7 +28,7 @@ const getHttpStatusCode = (options: getHttpStatusCodeOptions): number => {
   const statusCodeFromError = error.status || error.statusCode;
 
   if (isCelebrateError(error)) {
-    return ErrorCodes.BadRequest;
+    return StatusCodes.BadRequest;
   }
 
   if (statusCodeFromError && isErrorStatusCode(+statusCodeFromError)) {
@@ -40,7 +40,7 @@ const getHttpStatusCode = (options: getHttpStatusCodeOptions): number => {
     return statusCodeFromResponse;
   }
 
-  return ErrorCodes.InternalServerError;
+  return StatusCodes.InternalServerError;
 };
 
 export default getHttpStatusCode;

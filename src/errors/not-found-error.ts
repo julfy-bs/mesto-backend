@@ -1,4 +1,4 @@
-import { ErrorCodes } from '../vendor/constants/error-codes';
+import { StatusCodes } from '../vendor/constants/status-codes';
 import { ErrorText } from '../vendor/constants/error-text';
 
 class NotFoundError extends Error {
@@ -10,7 +10,7 @@ class NotFoundError extends Error {
     super(message);
     this.name = name;
     this.message = message;
-    this.statusCode = ErrorCodes.NotFound;
+    this.statusCode = StatusCodes.NotFound;
   }
 }
 export default NotFoundError;
