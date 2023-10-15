@@ -5,10 +5,10 @@ import {
 import cardValidation from '../vendor/validation/card';
 
 const router = Router();
-router.get('/cards', getCards);
-router.post('/cards', cardValidation.create, createCard);
-router.delete('/cards/:cardId', cardValidation.deleteById, deleteCardById);
-router.put('/cards/:cardId/likes', cardValidation.like, likeCard);
-router.delete('/cards/:cardId/likes', cardValidation.dislike, dislikeCard);
+router.get('/', getCards);
+router.post('/', cardValidation.create, createCard);
+router.delete('/:cardId', cardValidation.deleteById, deleteCardById);
+router.put('/:cardId/likes', cardValidation.like, likeCard);
+router.delete('/:cardId/likes', cardValidation.dislike, dislikeCard);
 
 export default router;
