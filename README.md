@@ -25,6 +25,16 @@ DELETE /cards/:cardId/likes — убрать лайк с карточки
 
 ## История версий
 
+- ***Версия 0.2.0***
+  - Добавляет email и password к схеме пользователя.
+  - Дорабатывает контроллер createUser.
+  - Добавляет контроллер login.
+  - Создает роут для логина и регистрации.
+  - Добавляет мидлвар для авторизации.
+  - Создает контроллер и роут для получения информации о пользователе.
+  - Защищает API авторизацией.
+
+
 - ***Версия 0.1.0***
   - Инициализирует приложение.
   - Добавляет конфигурацию компилятора TypeScript.
@@ -47,6 +57,7 @@ DELETE /cards/:cardId/likes — убрать лайк с карточки
 | Спринт | Версия |                                                                    Технологии                                                                     |                 Чек-листы                  |
 |:------:|:------:|:-------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------:|
 |   13   | 0.1.0  | [TypeScript][tech-ts] [ESLint][tech-eslint] [Mongoose][tech-mongoose] [Express][tech-express] [Celebrate][tech-celebrate] [Winston][tech-winston] | [чек-лист 13 спринта][project-checklist-1] |
+|   13   | 0.1.0  |                               [bcryptjs][tech-bcrypt] [jsonwebtoken][tech-jsonwebtoken] [validator][tech-validator]                               | [чек-лист 13 спринта][project-checklist-1] |
 
 ## Доступные скрипты
 
@@ -107,3 +118,9 @@ DELETE /cards/:cardId/likes — убрать лайк с карточки
 [tech-celebrate]: https://github.com/arb/celebrate
 
 [tech-eslint]: https://eslint.org/
+
+[tech-bcrypt]: https://www.npmjs.com/package/bcryptjs
+
+[tech-jsonwebtoken]: https://www.npmjs.com/package/jsonwebtoken
+
+[tech-validator]: https://www.npmjs.com/package/validator
