@@ -9,7 +9,6 @@ import handleDefaultError from './middleware/handle-default-error';
 import handleValidationError from './middleware/handle-validation-error';
 import { errorLogger, requestLogger } from './middleware/logger';
 import cardsRouter from './routes/cards';
-
 import usersRouter from './routes/users';
 
 import { sanitizedConfig } from './vendor/constants/config';

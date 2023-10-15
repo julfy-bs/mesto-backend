@@ -19,12 +19,12 @@ const cardSchema = new Schema<CardType>({
   link: {
     type: String,
     required: true,
-    validate: [validator.isURL, '{VALUE} не является валидным url\'ом']
+    validate: [validator.isURL, '{VALUE} не является валидным url\'ом'],
   },
   owner: {
     type: String,
     required: true,
-    validate: [validator.isMongoId, '{VALUE} не является валидным ObjectId']
+    validate: [validator.isMongoId, '{VALUE} не является валидным ObjectId'],
   },
   likes: {
     type: [Schema.Types.ObjectId],

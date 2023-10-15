@@ -1,23 +1,13 @@
-import { JwtPayload } from 'jsonwebtoken';
 import { Model, model, Schema } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import InvalidAuthentication from '../errors/invalid-authentication';
 
-import userDefaultData from '../vendor/constants/user-default-data';
-
-export type UserType = {
-  readonly _id: string;
-  token?: string | JwtPayload;
-  about: string;
-  avatar: string;
-  email: string;
-  name: string;
-  password: string;
-  repeatPassword: string;
-}
+import { UserType } from '../vendor/constants/user-type';
+import { userDefaultData } from '../vendor/constants/user-default-data';
 
 interface UserModel extends Model<UserType> {
+  // eslint-disable-next-line интерфейс выдает ошибку no-unused-vars.
   findUserByCredentials(email: string, password: string): Promise<UserType>;
 }
 
@@ -62,16 +52,14 @@ const userSchema = new Schema<UserType, UserModel>(
           .findOne({ email })
           .select('+password')
           .orFail(new InvalidAuthentication())
-          .then((user) => {
-            return bcrypt.compare(password, user.password)
-              .then((matched: boolean) => {
-                if (!matched) {
-                  throw new InvalidAuthentication();
-                }
+          .then((user) => bcrypt.compare(password, user.password)
+            .then((matched: boolean) => {
+              if (!matched) {
+                throw new InvalidAuthentication();
+              }
 
-                return user;
-              });
-          });
+              return user;
+            }));
       },
     },
   },

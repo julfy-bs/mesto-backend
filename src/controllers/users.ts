@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import BadRequestError from '../errors/bad-request-error';
 import NotFoundError from '../errors/not-found-error';
 import AppResponse from '../helpers/app-response';
 import User from '../models/user';
 import { sanitizedConfig } from '../vendor/constants/config';
 import { ErrorText } from '../vendor/constants/error-text';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { StatusCodes } from '../vendor/constants/status-codes';
 
 /**
@@ -27,8 +27,7 @@ export const getUsers = (request: Request, response: Response, next: NextFunctio
   .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
   .then((users) => response
     .status(StatusCodes.Success)
-    .send(new AppResponse(users).send()),
-  )
+    .send(new AppResponse(users).send()))
   .catch(next);
 
 /**
@@ -57,11 +56,9 @@ export const getUserById = (request: Request, response: Response, next: NextFunc
 
   User.findById(userId)
     .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
-    .then((user) =>
-      response
-        .status(StatusCodes.Success)
-        .send(new AppResponse(user).send()),
-    )
+    .then((user) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(user).send()))
     .catch(next);
 };
 
@@ -85,11 +82,9 @@ export const getCurrentUser = (request: Request, response: Response, next: NextF
 
   User.findById(request.user._id)
     .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
-    .then((user) =>
-      response
-        .status(StatusCodes.Success)
-        .send(new AppResponse(user).send()),
-    )
+    .then((user) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(user).send()))
     .catch(next);
 };
 
@@ -109,10 +104,14 @@ export const getCurrentUser = (request: Request, response: Response, next: NextF
  * @see NextFunction
  */
 export const createUser = (request: Request, response: Response, next: NextFunction) => {
-  const { password, about, avatar, name, email } = request.body;
+  const {
+    password, about, avatar, name, email,
+  } = request.body;
   bcrypt.hash(password, 10)
-    .then(hash => User.create({ about, avatar, name, email, password: hash }))
-    .then(newUser => {
+    .then((hash) => User.create({
+      about, avatar, name, email, password: hash,
+    }))
+    .then((newUser) => {
       if (!newUser) {
         throw new BadRequestError(ErrorText.ServerUserCreate);
       }
@@ -147,11 +146,9 @@ export const patchUserData = (request: Request, response: Response, next: NextFu
   }
   User.findByIdAndUpdate(request.user._id, { about, name }, { new: true })
     .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
-    .then((user) =>
-      response
-        .status(StatusCodes.Success)
-        .send(new AppResponse(user).send()),
-    )
+    .then((user) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(user).send()))
     .catch(next);
 };
 
@@ -181,8 +178,7 @@ export const patchUserAvatar = (request: Request, response: Response, next: Next
     .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
     .then((user) => response
       .status(StatusCodes.Success)
-      .send(new AppResponse(user).send()),
-    )
+      .send(new AppResponse(user).send()))
     .catch(next);
 };
 
@@ -211,7 +207,7 @@ export const login = (request: Request, response: Response, next: NextFunction) 
         });
       response
         .status(StatusCodes.Created)
-        .send(new AppResponse({ message: `Идентификация прошла успешно` }).send());
+        .send(new AppResponse({ message: 'Идентификация прошла успешно' }).send());
     })
     .catch(next);
 };

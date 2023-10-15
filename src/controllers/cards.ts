@@ -21,15 +21,14 @@ import { StatusCodes } from '../vendor/constants/status-codes';
  * @param {NextFunction} next - функция `next()` Express.
  * @see NextFunction
  */
-export const getCards = (request: Request, response: Response, next: NextFunction) =>
-  Card.find({})
-    .orFail(new NotFoundError(ErrorText.ServerCardNotFound))
-    .then((cards: CardType[]): void => {
-      response
-        .status(StatusCodes.Success)
-        .send(new AppResponse(cards).send());
-    })
-    .catch(next);
+export const getCards = (request: Request, response: Response, next: NextFunction) => Card.find({})
+  .orFail(new NotFoundError(ErrorText.ServerCardNotFound))
+  .then((cards: CardType[]): void => {
+    response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(cards).send());
+  })
+  .catch(next);
 
 /**
  * Функция обработчик запроса для удаления карточки по ID.
@@ -59,14 +58,13 @@ export const deleteCardById = (request: Request, response: Response, next: NextF
   return Card.findByIdAndDelete(cardId)
     .orFail(new NotFoundError(ErrorText.ServerCardDeleteNotFound))
     .then((card) => {
-        if (userId !== card.owner) {
-          throw new InvalidAuthentication(ErrorText.ServerAuthDeleteError);
-        }
-        response
-          .status(StatusCodes.Success)
-          .send(new AppResponse(card).send());
-      },
-    )
+      if (userId !== card.owner) {
+        throw new InvalidAuthentication(ErrorText.ServerAuthDeleteError);
+      }
+      response
+        .status(StatusCodes.Success)
+        .send(new AppResponse(card).send());
+    })
     .catch(next);
 };
 
@@ -139,8 +137,7 @@ export const likeCard = (request: Request, response: Response, next: NextFunctio
     .orFail(new NotFoundError(ErrorText.ServerCardLike))
     .then((card) => response
       .status(StatusCodes.Success)
-      .send(new AppResponse(card).send()),
-    )
+      .send(new AppResponse(card).send()))
     .catch(next);
 };
 
@@ -178,7 +175,6 @@ export const dislikeCard = (request: Request, response: Response, next: NextFunc
     .orFail(new NotFoundError(ErrorText.ServerCardDislike))
     .then((card) => response
       .status(StatusCodes.Success)
-      .send(new AppResponse(card).send()),
-    )
+      .send(new AppResponse(card).send()))
     .catch(next);
 };
