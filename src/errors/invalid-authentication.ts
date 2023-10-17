@@ -1,17 +1,17 @@
 import { StatusCodes } from '../vendor/constants/status-codes';
 import { ErrorText } from '../vendor/constants/error-text';
 
-class BadRequestError extends Error {
+class InvalidAuthentication extends Error {
   message: string;
 
   statusCode: number;
 
-  constructor(message = ErrorText.ServerBadRequest, name = 'Bad request') {
+  constructor(message = ErrorText.ServerEmailOrPassword, name = 'Unauthorized') {
     super(message);
     this.name = name;
     this.message = message;
-    this.statusCode = StatusCodes.BadRequest;
+    this.statusCode = StatusCodes.Unauthorized;
   }
 }
 
-export default BadRequestError;
+export default InvalidAuthentication;

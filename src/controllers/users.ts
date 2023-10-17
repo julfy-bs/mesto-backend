@@ -1,10 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import BadRequestError from '../errors/bad-request-error';
 import NotFoundError from '../errors/not-found-error';
 import AppResponse from '../helpers/app-response';
 import User from '../models/user';
+import { sanitizedConfig } from '../vendor/constants/config';
 import { ErrorText } from '../vendor/constants/error-text';
+import { StatusCodes } from '../vendor/constants/status-codes';
 
 /**
  * Функция обработчик запроса для получения коллекции пользователей.
@@ -20,12 +24,10 @@ import { ErrorText } from '../vendor/constants/error-text';
  * @see NextFunction
  */
 export const getUsers = (request: Request, response: Response, next: NextFunction) => User.find({})
-  .then((users) => {
-    if (users.length === 0) {
-      throw new NotFoundError(ErrorText.ServerUserNotFound);
-    }
-    response.send(new AppResponse(users).send());
-  })
+  .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
+  .then((users) => response
+    .status(StatusCodes.Success)
+    .send(new AppResponse(users).send()))
   .catch(next);
 
 /**
@@ -48,17 +50,41 @@ export const getUsers = (request: Request, response: Response, next: NextFunctio
 export const getUserById = (request: Request, response: Response, next: NextFunction) => {
   const { userId } = request.params;
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new BadRequestError(ErrorText.ServerId);
+  if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
+    throw new BadRequestError(ErrorText.ServerRequestsAuth);
   }
 
-  return User.findById(userId)
-    .then((user) => {
-      if (!user) {
-        throw new NotFoundError(ErrorText.ServerUserNotFound);
-      }
-      response.send(new AppResponse(user).send());
-    })
+  User.findById(userId)
+    .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
+    .then((user) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(user).send()))
+    .catch(next);
+};
+
+/**
+ * Функция обработчик запроса для получения текущего пользователя из коллекции.
+ * @see UserType
+ *
+ * @function
+ * @name getUserById
+ * @param {Request} request - объект запроса Express.
+ * @see Request
+ * @param {Response} response - объект ответа Express.
+ * @see Response
+ * @param {NextFunction} next - функция `next()` Express.
+ * @see NextFunction
+ */
+export const getCurrentUser = (request: Request, response: Response, next: NextFunction) => {
+  if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
+    throw new BadRequestError(ErrorText.ServerRequestsAuth);
+  }
+
+  User.findById(request.user._id)
+    .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
+    .then((user) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(user).send()))
     .catch(next);
 };
 
@@ -78,13 +104,20 @@ export const getUserById = (request: Request, response: Response, next: NextFunc
  * @see NextFunction
  */
 export const createUser = (request: Request, response: Response, next: NextFunction) => {
-  const { about, avatar, name } = request.body;
-  return User.create({ about, avatar, name })
+  const {
+    password, about, avatar, name, email,
+  } = request.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      about, avatar, name, email, password: hash,
+    }))
     .then((newUser) => {
       if (!newUser) {
         throw new BadRequestError(ErrorText.ServerUserCreate);
       }
-      response.send(new AppResponse(newUser).send());
+      response
+        .status(StatusCodes.Created)
+        .send(new AppResponse(newUser).send());
     })
     .catch(next);
 };
@@ -108,18 +141,14 @@ export const createUser = (request: Request, response: Response, next: NextFunct
  */
 export const patchUserData = (request: Request, response: Response, next: NextFunction) => {
   const { about, name } = request.body;
-  // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError(ErrorText.ServerId);
+    throw new BadRequestError(ErrorText.ServerRequestsAuth);
   }
-  // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
-  return User.findByIdAndUpdate(request.user._id, { about, name }, { new: true })
-    .then((user) => {
-      if (!user) {
-        throw new NotFoundError(ErrorText.ServerUserNotFound);
-      }
-      response.send(new AppResponse(user).send());
-    })
+  User.findByIdAndUpdate(request.user._id, { about, name }, { new: true })
+    .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
+    .then((user) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(user).send()))
     .catch(next);
 };
 
@@ -142,17 +171,43 @@ export const patchUserData = (request: Request, response: Response, next: NextFu
  */
 export const patchUserAvatar = (request: Request, response: Response, next: NextFunction) => {
   const { avatar } = request.body;
-  // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
   if (!mongoose.Types.ObjectId.isValid(request.user._id)) {
-    throw new BadRequestError(ErrorText.ServerId);
+    throw new BadRequestError(ErrorText.ServerRequestsAuth);
   }
-  // @ts-ignore ВРЕМЕННОЕ РЕШЕНИЕ. id пользователя в объекте запроса req.user._id
-  return User.findByIdAndUpdate(request.user._id, { avatar }, { new: true })
+  User.findByIdAndUpdate(request.user._id, { avatar }, { new: true })
+    .orFail(new NotFoundError(ErrorText.ServerUserNotFound))
+    .then((user) => response
+      .status(StatusCodes.Success)
+      .send(new AppResponse(user).send()))
+    .catch(next);
+};
+
+export const login = (request: Request, response: Response, next: NextFunction) => {
+  const { email, password } = request.body;
+
+  return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError(ErrorText.ServerUserNotFound);
-      }
-      response.send(new AppResponse(user).send());
+      const token = jwt.sign(
+        {
+          _id: user._id.toString(),
+        },
+        sanitizedConfig.AUTH_ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: sanitizedConfig.AUTH_ACCESS_TOKEN_EXPIRY,
+        },
+      );
+
+      response
+        .status(StatusCodes.Created)
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+          // secure: true
+        });
+      response
+        .status(StatusCodes.Created)
+        .send(new AppResponse({ message: 'Идентификация прошла успешно' }).send());
     })
     .catch(next);
 };

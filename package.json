@@ -1,6 +1,6 @@
 {
   "name": "mesto-backend",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Backend Server for project Mesto",
   "repository": "https://github.com/julfy-bs/mesto-backend/",
   "author": {
@@ -20,8 +20,11 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
+    "@types/cors": "^2.8.14",
     "@types/express": "^4.17.18",
+    "@types/jsonwebtoken": "^9.0.3",
     "@types/node": "^20.7.2",
+    "@types/validator": "^13.11.2",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "@typescript-eslint/parser": "^6.7.3",
     "eslint": "^8.50.0",
@@ -32,11 +35,15 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "celebrate": "^15.0.1",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-winston": "^4.2.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^6.0.11",
+    "validator": "^13.11.0",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1"
   }

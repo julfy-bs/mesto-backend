@@ -1,5 +1,4 @@
-import process from 'process';
-import config from '../vendor/config';
+import { sanitizedConfig } from '../vendor/constants/config';
 
 export type ResponseType = {
   success: boolean;
@@ -75,7 +74,7 @@ class AppResponse {
   }
 
   private log() {
-    if (process.env.NODE_ENV === config.NODE_ENV) {
+    if (sanitizedConfig.NODE_ENV === 'development') {
       console.log(this.response);
     }
   }

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import AppResponse, { ErrorResponseType } from '../helpers/app-response';
 import getErrorDetails from '../helpers/get-error-details';
 import getHttpStatusCode from '../helpers/get-http-status-code';
-import { ErrorCodes } from '../vendor/constants/error-codes';
+import { StatusCodes } from '../vendor/constants/status-codes';
 import { ErrorText } from '../vendor/constants/error-text';
 
 /**
@@ -26,7 +26,7 @@ const handleDefaultError = (
 ): void => {
   const statusCode = getHttpStatusCode({ error, response });
   const errorMessage = getErrorDetails(error);
-  if (statusCode === ErrorCodes.InternalServerError) {
+  if (statusCode === StatusCodes.InternalServerError) {
     errorMessage.message = ErrorText.ServerDefault;
   }
   const errorResponse: ErrorResponseType = {
