@@ -22,8 +22,11 @@ import { StatusCodes } from '../vendor/constants/status-codes';
  * @see NextFunction
  */
 export const getCards = (request: Request, response: Response, next: NextFunction) => Card.find({})
-  .orFail(new NotFoundError(ErrorText.ServerCardNotFound))
   .then((cards: CardType[]): void => {
+    if (cards.length === 0) {
+      response.status(200)
+        .send(new AppResponse([]).send());
+    }
     response
       .status(StatusCodes.Success)
       .send(new AppResponse(cards).send());
