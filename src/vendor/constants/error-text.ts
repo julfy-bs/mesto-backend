@@ -25,4 +25,5 @@ export enum ErrorText {
   ServerEmailOrPassword = 'Неправильные почта или пароль',
   ServerRequestsAuth = 'Необходима авторизация',
   ServerAuthDeleteError = 'Можно удалять только карточки, которые были созданы вами',
+  ServerValidationError = 'Validation Error'
 }

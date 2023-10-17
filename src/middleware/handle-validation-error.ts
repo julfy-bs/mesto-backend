@@ -8,7 +8,7 @@ type ValidationSources = 'body' | 'params' | 'cookies' | 'headers';
 const createValidationErrorResponse = (validatedData: ValidationSources[], error = 'Bad request', message = 'Ошибка валидации входных данных'): ValidationErrorResponseType => {
   const errorResponse: ValidationErrorResponseType = {
     statusCode: StatusCodes.BadRequest,
-    name: error,
+    name: ErrorText.ServerValidationError,
     message: message || ErrorText.ServerBadRequest,
   };
   validatedData.forEach((item) => {
